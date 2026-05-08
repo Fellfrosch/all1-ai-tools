@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Категория строеж и паркоместа</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F2EC;--surface:#FFFFFF;--ink:#18150F;--ink2:#54504A;--ink3:#96917F;
+  --border:#DDD8CF;--r:5px;--shadow:0 1px 12px rgba(0,0,0,.08);
+  --cat-I:#7A1515;--cat-II:#6B3D0A;--cat-III:#13406C;--cat-IV:#155429;--cat-V:#3D2069;--cat-VI:#333;
+}
+body{font-family:'Source Sans 3',sans-serif;font-weight:400;background:var(--bg);color:var(--ink);min-height:100vh}
+
+header{background:var(--ink);color:#fff;padding:26px 30px 22px;position:relative;overflow:hidden}
+header::after{content:'';position:absolute;right:-20px;top:-20px;width:180px;height:180px;border:1px solid rgba(255,255,255,.06);border-radius:50%}
+.h-sup{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:7px}
+header h1{font-family:'Playfair Display',serif;font-size:clamp(18px,3.5vw,26px);font-weight:700;line-height:1.2}
+header p{font-size:11px;color:rgba(255,255,255,.38);margin-top:5px;font-weight:300}
+
+main{max-width:660px;margin:0 auto;padding:28px 18px 56px}
+
+/* PROGRESS BAR */
+.prog-wrap{margin-bottom:26px}
+.prog-track{height:2px;background:var(--border);border-radius:1px;overflow:hidden}
+.prog-fill{height:100%;background:var(--ink);border-radius:1px;transition:width .4s ease}
+.prog-labels{display:flex;justify-content:space-between;margin-top:6px}
+.prog-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);transition:color .3s}
+.prog-lbl.done{color:var(--ink)}
+
+/* STEP */
+.step{display:none}.step.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.step-num{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px}
+.step-q{font-family:'Playfair Display',serif;font-size:clamp(16px,3vw,21px);font-weight:500;line-height:1.35;margin-bottom:5px}
+.step-hint{font-size:12px;color:var(--ink3);margin-bottom:16px;line-height:1.5}
+
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:13px;color:var(--ink);text-align:left;transition:border-color .12s,transform .08s;position:relative;line-height:1.35}
+.opt:hover{border-color:var(--ink);transform:translateX(3px)}
+.opt .s{display:block;font-size:11px;color:var(--ink3);margin-top:2px}
+.opt .arr{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink3)}
+.opt:hover .arr{color:var(--ink)}
+
+/* BACK */
+.back-btn{background:none;border:none;font-family:'Source Sans 3',sans-serif;font-size:11px;color:var(--ink3);cursor:pointer;padding:0;margin-bottom:16px;display:flex;align-items:center;gap:3px;letter-spacing:.02em}
+.back-btn:hover{color:var(--ink)}
+
+/* INPUTS */
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.field-full{grid-column:1/-1}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--ink2);margin-bottom:4px;letter-spacing:.02em}
+.field input,.field select{width:100%;border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;font-family:'Source Sans 3',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);transition:border-color .12s;appearance:none}
+.field input:focus,.field select:focus{outline:none;border-color:var(--ink)}
+.field .fhint{font-size:10px;color:var(--ink3);margin-top:3px}
+.calc-btn{background:var(--ink);color:#fff;border:none;border-radius:var(--r);padding:10px 24px;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:500;cursor:pointer;letter-spacing:.02em;transition:opacity .15s}
+.calc-btn:hover{opacity:.82}
+
+/* RESULT */
+.result{display:none}
+.result-top{background:var(--ink);color:#fff;border-radius:var(--r) var(--r) 0 0;padding:18px 22px}
+.result-badge{font-size:9px;letter-spacing:.18em;text-transform:uppercase;opacity:.5;margin-bottom:6px}
+.result-title{font-family:'Playfair Display',serif;font-size:clamp(17px,3vw,22px);font-weight:700;line-height:1.2;margin-bottom:4px}
+.result-ref{font-size:10px;opacity:.4;font-style:italic}
+
+.sections{border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);overflow:hidden}
+.section{border-bottom:1px solid var(--border);background:var(--surface)}
+.section:last-child{border-bottom:none}
+.sec-head{display:flex;align-items:center;gap:8px;padding:14px 18px 12px;border-bottom:1px solid var(--border);background:#FAFAF8}
+.sec-icon{font-size:14px}
+.sec-title{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+.sec-body{padding:14px 18px}
+
+/* TEXT BLOCK — explanatory paragraph style */
+.text-block{font-size:12.5px;line-height:1.75;color:var(--ink2)}
+.text-block strong{color:var(--ink);font-weight:600}
+.text-block .calc-line{margin:6px 0;padding:8px 12px;background:var(--bg);border-left:2px solid var(--border);font-size:12px;color:var(--ink2);font-style:italic;line-height:1.6}
+.text-block .result-line{margin-top:10px;font-weight:500;color:var(--ink);font-size:13px}
+.text-block .ref-line{margin-top:8px;font-size:11px;color:var(--ink3);font-style:italic}
+
+/* CAT CHIP */
+.cat-chip{display:inline-block;border-radius:3px;padding:2px 8px;font-size:10px;font-weight:600;letter-spacing:.08em;margin-bottom:10px}
+.c-I{background:#FDF0EF;color:#7A1515}.c-II{background:#FDF5EA;color:#6B3D0A}
+.c-III{background:#EEF4FB;color:#13406C}.c-IV{background:#EEF8F2;color:#155429}
+.c-V{background:#F4F0FB;color:#3D2069}.c-VI{background:#F2F2F2;color:#333}
+
+.actions{padding:16px 18px;display:flex;gap:8px;flex-wrap:wrap;background:#FAFAF8;border-top:1px solid var(--border)}
+.btn{border:none;border-radius:var(--r);padding:8px 16px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Source Sans 3',sans-serif;letter-spacing:.02em;transition:opacity .15s}
+.btn-primary{background:var(--ink);color:#fff}.btn-secondary{background:var(--bg);border:1px solid var(--border);color:var(--ink2)}
+.btn:hover{opacity:.8}
+
+footer{text-align:center;padding:16px;font-size:10px;color:var(--ink3);border-top:1px solid var(--border);margin-top:12px;line-height:1.6}
+
+@media(max-width:480px){
+  header{padding:18px 14px}.main{padding:20px 10px 48px}
+  .fields{grid-template-columns:1fr}.sec-body{padding:12px 14px}.sec-head{padding:12px 14px 10px}
+  .actions{padding:12px 14px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-sup">Инструмент за проектиране · ЗУТ / РД-02-20-2</div>
+  <h1>Категория строеж и паркоместа</h1>
+  <p>Единен wizard — категория строеж + всички видове паркоместа наведнъж</p>
+</header>
+<main>
+
+<!-- PROGRESS -->
+<div class="prog-wrap">
+  <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+  <div class="prog-labels">
+    <span class="prog-lbl" id="pl0">Вид строеж</span>
+    <span class="prog-lbl" id="pl1">Параметри</span>
+    <span class="prog-lbl" id="pl2">Резултат</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     СТЪПКА 1 — ВИД СТРОЕЖ
+═══════════════════════════════════ -->
+<div class="step active" id="s1">
+  <div class="step-num">Стъпка 1 от 2</div>
+  <div class="step-q">Какъв тип е строежът?</div>
+  <div class="step-hint">Изберете основната функция. Ще изчислим категорията и всички паркоместа наведнъж.</div>
+  <div class="opts">
+    <button class="opt" onclick="pick('type','zhil')">Жилищна сграда<span class="s">Апартаментни, еднофамилни, вили</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','admin')">Административна сграда / офиси<span class="s">Централна или местна администрация, офис сгради</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','turg')">Търговски обект<span class="s">Търговски центрове, магазини, пазари, едро</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','hotel')">Хотел / апарт-хотел<span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','lechebno')">Лечебно / медицинско заведение<span class="s">Болница, поликлиника, мед. център, ДКЦ</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','sport')">Спортен обект<span class="s">Зали, стадиони, арени, басейни, тенискортове</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','kultura')">Театър / кино / концертна зала<span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','obrazovanie')">Образование<span class="s">Училища, колежи, университети</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','detsko')">Детско заведение<span class="s">Детски градини, ясли</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','socusluga')">Социални услуги<span class="s">Домове за стари хора, дневни центрове, приюти</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','proizv')">Производствена сграда<span class="s">Фабрики, производствени предприятия</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','sklad')">Склад / товарен терминал<span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','restoran')">Заведение за обществено хранене<span class="s">Ресторанти, барове, кафенета</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','transport')">Транспортна сграда<span class="s">Ж.п. гара, автогара, летище, морска гара</span><span class="arr">›</span></button>
+    <button class="opt" onclick="pick('type','obshtezhitie')">Общежитие<span class="arr">›</span></button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     СТЪПКА 2 — ПАРАМЕТРИ (динамична)
+═══════════════════════════════════ -->
+<div class="step" id="s2">
+  <button class="back-btn" onclick="goBack()">‹ Назад</button>
+  <div class="step-num">Стъпка 2 от 2</div>
+  <div class="step-q" id="s2-title">Параметри на обекта</div>
+  <div class="step-hint" id="s2-hint"></div>
+  <div class="fields" id="s2-fields"></div>
+  <button class="calc-btn" onclick="calculate()">Изчисли категорията и паркоместата →</button>
+</div>
+
+<!-- ═══════════════════════════════════
+     РЕЗУЛТАТ
+═══════════════════════════════════ -->
+<div class="result" id="result">
+  <div class="result-top">
+    <div class="result-badge" id="r-badge">РЕЗУЛТАТ</div>
+    <div class="result-title" id="r-title"></div>
+    <div class="result-ref" id="r-ref"></div>
+  </div>
+  <div class="sections" id="r-sections"></div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="restart()">← Ново изчисление</button>
+    <button class="btn btn-secondary" id="copy-btn" onclick="copyAll()">Копирай текста</button>
+  </div>
+</div>
+
+</main>
+<footer>
+  Категория строеж: чл. 137 ЗУТ · Автомобилни и велосипедни паркоместа: Прил. № 5 (авт.) и Прил. № 4 (вел.) към Наредба № РД-02-20-2 от 2017 г.<br>
+  Достъпни паркоместа: чл. 22–25 от Наредба № РД-02-20-2 от 2021 г. (изм. ДВ бр. 64/2024) · Инструментът е информативен и не замества правна консултация.
+</footer>
+
+<script>
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+let TYPE = '';
+
+// ─────────────────────────────────────────
+// STEP NAVIGATION
+// ─────────────────────────────────────────
+function showStep(id, prog, labels){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('prog').style.width = prog+'%';
+  ['pl0','pl1','pl2'].forEach((l,i)=>{
+    document.getElementById(l).classList.toggle('done', labels[i]);
+  });
+  document.getElementById('result').style.display = 'none';
+}
+function goBack(){
+  showStep('s1', 0, [false,false,false]);
+}
+
+// ─────────────────────────────────────────
+// CONFIG PER TYPE: fields + calc metadata
+// ─────────────────────────────────────────
+const CONFIGS = {
+
+  zhil:{
+    label:'Жилищна сграда',
+    hint:'Въведете броя жилища и застрояването, за да определим категорията и всички паркоместа.',
+    fields:[
+      {id:'zhil_count',label:'Брой жилища (апартаменти)',type:'num',hint:''},
+      {id:'zhil_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:'Кота корниз — горен ръб на последна плоча'},
+      {id:'zhil_rzp',label:'РЗП (м²)',type:'num',hint:'Разгъната застроена площ'},
+      {id:'zhil_etaj4',label:'Жилища по Прил. № 4 (бр.)',type:'num',hint:'Жилища за хора с намалена подвижност — за достъпни паркоместа; 0 ако няма'},
+    ],
+  },
+
+  admin:{
+    label:'Административна сграда / офиси',
+    hint:'',
+    fields:[
+      {id:'admin_rzp',label:'РЗП (м²)',type:'num',hint:''},
+      {id:'admin_vid',label:'Вид администрация',type:'sel',opts:['Централна администрация (1/60–80 м²)','Местна администрация / офиси (1/80–100 м²)'],hint:''},
+      {id:'admin_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+    ],
+  },
+
+  turg:{
+    label:'Търговски обект',
+    hint:'',
+    fields:[
+      {id:'turg_vid',label:'Вид',type:'sel',opts:['Търговски център','Търговия на едро / тържище','Магазини в централна зона','Други магазини','Пазар (открит или закрит)'],hint:''},
+      {id:'turg_rzp',label:'РЗП (м²)',type:'num',hint:'За търговски центрове: брутна отдаваема търговска площ'},
+      {id:'turg_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+      {id:'turg_mesta',label:'Брой места за посетители',type:'num',hint:'Капацитет — за определяне на категорията'},
+    ],
+  },
+
+  hotel:{
+    label:'Хотел',
+    hint:'',
+    fields:[
+      {id:'hotel_vid',label:'Вид',type:'sel',opts:['Хотел 4 или 5 звезди','Хотел 1, 2 или 3 звезди','Апартаментен хотел'],hint:''},
+      {id:'hotel_stai',label:'Брой стаи / апартаменти',type:'num',hint:''},
+      {id:'hotel_legla',label:'Брой легла',type:'num',hint:'Обикновено 2 легла/стая'},
+      {id:'hotel_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+      {id:'hotel_mesta',label:'Капацитет (места за посетители)',type:'num',hint:'За определяне на категорията ОО'},
+    ],
+  },
+
+  lechebno:{
+    label:'Лечебно / медицинско заведение',
+    hint:'',
+    fields:[
+      {id:'lech_vid',label:'Вид',type:'sel',opts:['Лечебно / здравно заведение (болница)','Групова практика / мед. център / ДКЦ','Дом за медико-социални грижи'],hint:''},
+      {id:'lech_rzp',label:'РЗП (м²)',type:'num',hint:'За велосипедни паркоместа'},
+      {id:'lech_legla',label:'Брой легла',type:'num',hint:'За болница и медико-социален дом'},
+      {id:'lech_kab',label:'Брой лекарски кабинети',type:'num',hint:'За групова практика / мед. център / ДКЦ'},
+      {id:'lech_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+      {id:'lech_mesta',label:'Капацитет (места за посетители)',type:'num',hint:'За определяне на категорията ОО'},
+    ],
+  },
+
+  sport:{
+    label:'Спортен обект',
+    hint:'',
+    fields:[
+      {id:'sport_vid',label:'Вид',type:'sel',opts:['Спортна зала / закрит басейн без зрители','Стадион / арена с места за зрители','Открит спортен обект с места за зрители','Тенискортове без зрители','Тенискортове с места за зрители'],hint:''},
+      {id:'sport_zp',label:'Застроена площ ЗП (м²)',type:'num',hint:'За изчисление на паркоместа'},
+      {id:'sport_zrit',label:'Брой зрителски места',type:'num',hint:'При обекти с места за зрители'},
+      {id:'sport_korts',label:'Брой кортове',type:'num',hint:'За тенискортове'},
+      {id:'sport_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+    ],
+  },
+
+  kultura:{
+    label:'Театър / кино / концертна зала',
+    hint:'',
+    fields:[
+      {id:'kult_mesta',label:'Брой места за посетители',type:'num',hint:''},
+      {id:'kult_rzp',label:'РЗП (м²)',type:'num',hint:''},
+      {id:'kult_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+    ],
+  },
+
+  obrazovanie:{
+    label:'Образование',
+    hint:'',
+    fields:[
+      {id:'obr_vid',label:'Вид',type:'sel',opts:['Начално / средно училище','Колеж / Висше училище'],hint:''},
+      {id:'obr_uch',label:'Брой ученици / студенти',type:'num',hint:''},
+      {id:'obr_sluz',label:'Брой служители / преподаватели',type:'num',hint:''},
+      {id:'obr_rzp',label:'РЗП (м²)',type:'num',hint:''},
+      {id:'obr_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+      {id:'obr_mesta',label:'Капацитет (места за посетители)',type:'num',hint:''},
+    ],
+  },
+
+  detsko:{
+    label:'Детско заведение',
+    hint:'',
+    fields:[
+      {id:'det_deca',label:'Брой деца',type:'num',hint:''},
+      {id:'det_sluz',label:'Брой служители',type:'num',hint:''},
+      {id:'det_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+    ],
+  },
+
+  socusluga:{
+    label:'Социални услуги',
+    hint:'',
+    fields:[
+      {id:'soc_vid',label:'Вид',type:'sel',opts:['Специализирани институции / домове за стари хора','Дневен център / рехабилитация'],hint:''},
+      {id:'soc_legla',label:'Брой легла',type:'num',hint:'За специализирани институции'},
+      {id:'soc_potr',label:'Брой потребители/час',type:'num',hint:'За дневен център'},
+      {id:'soc_sluz',label:'Брой служители',type:'num',hint:'За велосипедни паркоместа'},
+      {id:'soc_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 М)','Високо (над 15 м)'],hint:''},
+    ],
+  },
+
+  proizv:{
+    label:'Производствена сграда',
+    hint:'',
+    fields:[
+      {id:'pr_raboteshti',label:'Брой работещи (най-голяма смяна)',type:'num',hint:'При посменна работа — само работещите от най-голямата смяна'},
+      {id:'pr_rzp',label:'РЗП (м²)',type:'num',hint:'За велосипедни паркоместа'},
+      {id:'pr_sektor',label:'Сектор',type:'sel',opts:['Стандартен производствен сектор','Металургия или химическа промишленост'],hint:'Металургията и химията са I категория независимо от капацитета'},
+    ],
+  },
+
+  sklad:{
+    label:'Склад / товарен терминал',
+    hint:'',
+    fields:[
+      {id:'sk_raboteshti',label:'Брой работещи (най-голяма смяна)',type:'num',hint:''},
+      {id:'sk_rzp',label:'РЗП (м²)',type:'num',hint:'За велосипедни паркоместа'},
+    ],
+  },
+
+  restoran:{
+    label:'Заведение за обществено хранене',
+    hint:'',
+    fields:[
+      {id:'rest_mesta',label:'Брой места за хранене',type:'num',hint:''},
+      {id:'rest_rzp',label:'РЗП (м²)',type:'num',hint:''},
+      {id:'rest_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+    ],
+  },
+
+  transport:{
+    label:'Транспортна сграда',
+    hint:'',
+    fields:[
+      {id:'tr_vid',label:'Вид',type:'sel',opts:['Ж.п. гара / автогара / морска / речна гара','Летище'],hint:''},
+      {id:'tr_patnici',label:'Брой пътници/час',type:'num',hint:'Проектна натовареност'},
+      {id:'tr_sluz',label:'Брой служители',type:'num',hint:'За велосипедни паркоместа'},
+      {id:'tr_mesta',label:'Капацитет (места за посетители)',type:'num',hint:''},
+      {id:'tr_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+    ],
+  },
+
+  obshtezhitie:{
+    label:'Общежитие',
+    hint:'',
+    fields:[
+      {id:'ob_vid',label:'Вид',type:'sel',opts:['С жилищни помещения (стаи)','С жилищни единици (апартаменти)'],hint:''},
+      {id:'ob_count',label:'Брой жилищни помещения / единици',type:'num',hint:''},
+      {id:'ob_legla',label:'Брой легла',type:'num',hint:'За велосипедни паркоместа'},
+      {id:'ob_height',label:'Застрояване',type:'sel',opts:['Ниско (до 10 м)','Средно (до 15 м)','Високо (над 15 м)'],hint:''},
+    ],
+  },
+};
+
+function pick(key, val){
+  TYPE = val;
+  const cfg = CONFIGS[val];
+  if(!cfg) return;
+  document.getElementById('s2-title').textContent = cfg.label;
+  document.getElementById('s2-hint').textContent = cfg.hint || 'Въведете данните за обекта.';
+  // Build fields
+  let html = '';
+  cfg.fields.forEach(f=>{
+    const fullClass = f.full ? ' field-full' : '';
+    if(f.type==='sel'){
+      html+=`<div class="field${fullClass}"><label>${f.label}</label>
+        <select id="${f.id}"><option value="">— изберете —</option>${f.opts.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>
+        ${f.hint?`<div class="fhint">${f.hint}</div>`:''}</div>`;
+    } else {
+      html+=`<div class="field${fullClass}"><label>${f.label}</label>
+        <input type="number" id="${f.id}" min="0" value="" placeholder="0">
+        ${f.hint?`<div class="fhint">${f.hint}</div>`:''}</div>`;
+    }
+  });
+  document.getElementById('s2-fields').innerHTML = html;
+  showStep('s2', 50, [true,false,false]);
+}
+
+// ─────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────
+function n(id){ const e=document.getElementById(id); return e?(parseFloat(e.value)||0):0; }
+function s(id){ const e=document.getElementById(id); return e?(e.value||''):''; }
+function ceil(x){ return Math.ceil(x); }
+function fmt(x){ return x%1===0?x:x.toFixed(2); }
+function fmtR(x){ return x%1===0?x+'':x.toFixed(2); }
+
+// КАТЕГОРИЯ от застрояване (за жилищни/смесени)
+function catFromHeight(h){
+  if(h.includes('Ниско')) return {cat:'V',ref:'т. 5, буква „а"',reason:'ниско застрояване до 10 м (кота корниз)'};
+  if(h.includes('Средно')) return {cat:'IV',ref:'т. 4, буква „б"',reason:'средно застрояване до 15 м (кота корниз)'};
+  return {cat:'III',ref:'т. 3, буква „в"',reason:'високо застрояване над 15 м (кота корниз)'};
+}
+// КАТЕГОРИЯ ОО от капацитет/РЗП
+function catFromOO(mesta, rzp){
+  if(mesta>1000) return {cat:'II',ref:'т. 2, буква „д"',reason:`капацитет над 1 000 места за посетители (${mesta} бр.)`};
+  if(mesta>200||rzp>5000) return {cat:'III',ref:'т. 3, буква „в"',reason:mesta>200?`капацитет ${mesta} места (200–1 000)`:`РЗП ${rzp} м² (над 5 000 м²)`};
+  if(mesta>100||rzp>1000) return {cat:'IV',ref:'т. 4, буква „б"',reason:mesta>100?`капацитет ${mesta} места (100–200)`:`РЗП ${rzp} м² (1 000–5 000 м²)`};
+  return {cat:'V',ref:'т. 5, буква „а"',reason:mesta?`капацитет до 100 места (${mesta} бр.)`:`РЗП до 1 000 м² (${rzp} м²)`};
+}
+
+// ДОСТЪПНИ — чл. 22
+function dostapen(N_avt, isSpecial, isZhil, etaj4, label_avt){
+  if(isZhil){
+    const e4 = etaj4||0;
+    if(e4===0) return {
+      count:0, way:'—',
+      text:`Достъпни паркоместа за хора с увреждания по чл. 22, ал. 2 от Наредба № РД-02-20-2 от 26.01.2021 г. се предвиждат само при наличие на жилища, проектирани по Приложение № 4 (жилища за хора с намалена подвижност). При въведени 0 такива жилища не се изискват достъпни паркоместа.`
+    };
+    return {
+      count:e4, way:'в рамките на капацитета',
+      text:`Достъпни паркоместа за хора с увреждания по чл. 22, ал. 2 от Наредба № РД-02-20-2 от 26.01.2021 г. са предвидени <strong>${e4} бр.</strong>, равен на броя жилища по Приложение № 4. Местата се осигуряват в рамките на общия капацитет от ${label_avt}. Всяко достъпно паркомясто е с широчина 360 cm, нехлъзгава настилка с наклон ≤ 3%, разполага се до 50 m от достъпния вход и се обозначава с пътен знак Д21 и синя маркировка с бял символ за достъпност.`
+    };
+  }
+  let count=0, basis='';
+  if(isSpecial){
+    count=Math.max(1,ceil(N_avt*0.1));
+    basis=`10% × ${N_avt} авт. паркоместа = ${fmtR(N_avt*0.1)} → ${count} бр. (мин. 1)`;
+  } else {
+    if(N_avt<=10){count=1;basis='паркинг до 10 места → мин. 1 бр.';}
+    else if(N_avt<=30){count=2;basis='паркинг до 30 места → мин. 2 бр.';}
+    else if(N_avt<=50){count=3;basis='паркинг до 50 места → мин. 3 бр.';}
+    else{count=ceil(N_avt*0.04);basis=`4% × ${N_avt} = ${fmtR(N_avt*0.04)} → ${count} бр.`;}
+  }
+  const pct = isSpecial?'10%':'4%';
+  return {
+    count, way:'допълнително към капацитета',
+    text:`Достъпни паркоместа за хора с увреждания по чл. 22, ал. 1 от Наредба № РД-02-20-2 от 26.01.2021 г. (изм. ДВ бр. 64/2024) са предвидени <strong>${count} бр.</strong> допълнително към капацитета на паркинга, въз основа на следното изчисление:<div class="calc-line">${basis}</div>Всяко достъпно паркомясто е с широчина 360 cm, нехлъзгава настилка с наклон ≤ 3%, разполага се до 50 m от достъпния вход и се обозначава с пътен знак Д21 и синя маркировка с бял символ за достъпност (чл. 23–25).`
+  };
+}
+
+// EPS — чл. 50
+function epsText(total, isZhil){
+  if(total<=10) return `Не са предвидени паркоместа със зарядна точка за ЕПС съгласно чл. 50, ал. 2 от Наредба № РД-02-20-2 от 2017 г., тъй като общият брой паркоместа (${total} бр.) е по-малък от 10.`;
+  if(isZhil) return `За нова жилищна сграда с ${total} паркоместа (>10 бр.) се предвижда тръбопроводна инфраструктура за всички паркоместа, за да се осигури възможност за инсталиране на зарядни точки за ЕПС на по-късен етап (чл. 50, ал. 7 от Наредба № РД-02-20-2 от 2017 г.). Видът и броят на зарядните точки се определят по задание на възложителя.`;
+  const trub = ceil(total/5);
+  return `Предвидени са паркоместа за ЕПС съгласно чл. 50, ал. 2 от Наредба № РД-02-20-2 от 2017 г.:<div class="calc-line">• Мин. 1 паркомясто, оборудвано с зарядна точка с голяма мощност (&gt;22 kW)<br>• Мин. 1 паркомясто, оборудвано с зарядна точка с мощност до 3,7 kW (за ЕПС категория L)<br>• За 1 от всеки 5 паркоместа се проектира тръбопроводна инфраструктура за бъдеща зарядна точка → ${trub} паркоместа с тръбопровод</div>От 01.01.2025 г. при над 20 паркоместа задължително се оборудва минимум 1 зарядна точка с голяма мощност и мин. 1 с мощност до 3,7 kW (§ 35 от НИД, ДВ бр. 79/2022).`;
+}
+
+// ─────────────────────────────────────────
+// MAIN CALCULATE
+// ─────────────────────────────────────────
+function calculate(){
+  showStep('s2',50,[true,false,false]); // keep s2 visible during calc
+
+  let catObj={cat:'',ref:'',reason:''};
+  let sectionsHTML = '';
+  let copyText = '';
+
+  const NALOGKA_AVT = 'Наредба № РД-02-20-2 от 20 декември 2017 г. за планиране и проектиране на комуникационно-транспортната система на урбанизираните територии, Приложение № 5 към чл. 42 и чл. 50';
+  const NALOGKA_VEL = 'Наредба № РД-02-20-2 от 20 декември 2017 г. за планиране и проектиране на комуникационно-транспортната система на урбанизираните територии, Приложение № 4 към чл. 40, ал. 3';
+  const NALOGKA_DOST = 'Наредба № РД-02-20-2 от 26.01.2021 г. за определяне на изискванията за достъпност и универсален дизайн (изм. ДВ бр. 64/2024), чл. 22–25';
+
+  // ── per-type calculations ──
+  let avt_main=0, avt_min=0, avt_max=0, avt_dopr_pct=0;
+  let avt_dopr_min=0, avt_dopr_max=0, total_min=0, total_max=0;
+  let avt_basis_text='', avt_result_text='', avt_range=false;
+  let velo_total=0, velo_k1=0, velo_k2=0, velo_basis_text='', velo_note='';
+  let dost={count:0,way:'',text:''};
+  let isSpecialDost=false, isZhil=false;
+  let label='';
+
+  switch(TYPE){
+
+  case 'zhil':{
+    const cnt=n('zhil_count'), rzp=n('zhil_rzp'), h=s('zhil_height'), e4=n('zhil_etaj4');
+    catObj=catFromHeight(h||'Средно');
+    isZhil=true; label='Жилищна сграда';
+    avt_main=cnt; avt_min=avt_max=cnt; avt_dopr_pct=0; total_min=total_max=cnt;
+    avt_basis_text=`${cnt} жилища × 1 бр. паркомясто / жилище = ${cnt} бр.`;
+    avt_result_text=`${cnt} бр.`;
+    // velo: 1.5/жилище Кл1 + 6 стойки Кл2
+    const v_main=ceil(cnt*1.5); velo_k1=v_main; velo_k2=6; velo_total=v_main+6;
+    velo_basis_text=`${cnt} жилища × 1,5 бр. / жилище = ${fmtR(cnt*1.5)} → ${v_main} бр. (Клас 1, закрити/заключени) + задължителни 6 бр. открити стойки (Клас 2) пред сградата`;
+    velo_note='При наличен гараж или складово помещение извън жилището нормата от 1,5 бр./жилище отпада; остават задължителните 6 бр. открити стойки.';
+    dost=dostapen(cnt,false,true,e4,cnt+' бр.');
+    break;
+  }
+
+  case 'admin':{
+    const rzp=n('admin_rzp'), vid=s('admin_vid'), h=s('admin_height');
+    const isCentral=vid.includes('Централна');
+    const nm=isCentral?'60–80':' 80–100', nMin=isCentral?60:80, nMax=isCentral?80:100;
+    catObj=catFromHeight(h||'Средно');
+    label='Административна сграда / офиси';
+    avt_min=ceil(rzp/nMax); avt_max=ceil(rzp/nMin); avt_dopr_pct=20;
+    avt_dopr_min=ceil(avt_min*0.2); avt_dopr_max=ceil(avt_max*0.2);
+    total_min=avt_min+avt_dopr_min; total_max=avt_max+avt_dopr_max; avt_range=true;
+    avt_basis_text=`${rzp} м² РЗП / ${nm} м² за 1 бр. паркомясто по наредба = ${fmtR(rzp/nMax)}–${fmtR(rzp/nMin)} → ${avt_min}–${avt_max} бр. основни. Към това се добавят 20% за посетители: ${avt_min}×20% = ${fmtR(avt_min*0.2)} и ${avt_max}×20% = ${fmtR(avt_max*0.2)}`;
+    avt_result_text=`${total_min}–${total_max} бр.`;
+    velo_total=ceil(rzp/100); velo_k1=ceil(velo_total*0.5); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${rzp} м² РЗП / 100 м² за 1 бр. велопаркомясто = ${fmtR(rzp/100)} → ${velo_total} бр. Разпределение: Клас 1 – 50% (${velo_k1} бр.), Клас 2 – 50% (${velo_k2} бр.)`;
+    const tRef=Math.round((total_min+total_max)/2);
+    dost=dostapen(tRef,false,false,0,''); isSpecialDost=false;
+    break;
+  }
+
+  case 'turg':{
+    const vid=s('turg_vid'), rzp=n('turg_rzp'), h=s('turg_height'), mesta=n('turg_mesta');
+    const isCentr=vid.includes('централна'); const isEdro=vid.includes('едро');
+    const isPazar=vid.includes('Пазар');
+    let nMin=40,nMax=60,nVelo=100,veloK1pct=0.3;
+    if(isCentr){nMin=35;nMax=35;nVelo=35;}
+    else if(vid.includes('Друг')){nMin=100;nMax=150;nVelo=100;}
+    else if(isPazar){nMin=50;nMax=60;nVelo=100;}
+    avt_min=ceil(rzp/nMax); avt_max=ceil(rzp/nMin); avt_dopr_pct=isPazar?90:75;
+    avt_dopr_min=ceil(avt_min*avt_dopr_pct/100); avt_dopr_max=ceil(avt_max*avt_dopr_pct/100);
+    total_min=avt_min+avt_dopr_min; total_max=avt_max+avt_dopr_max; avt_range=(avt_min!==avt_max);
+    catObj=catFromOO(mesta,rzp);
+    label=vid||'Търговски обект';
+    avt_basis_text=`${rzp} м² / ${nMin===nMax?nMin:nMin+'–'+nMax} м² = ${avt_min===avt_max?avt_min:avt_min+'–'+avt_max} бр. основни. Доп. ${avt_dopr_pct}% за посетители: ${avt_dopr_min===avt_dopr_max?avt_dopr_min:avt_dopr_min+'–'+avt_dopr_max} бр.`;
+    avt_result_text=(total_min===total_max?total_min:total_min+'–'+total_max)+' бр.';
+    velo_total=ceil(vid.includes('Търговски ц')?rzp/100:rzp/nVelo);
+    velo_k1=ceil(velo_total*veloK1pct); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${rzp} м² / ${nVelo} м² = ${fmtR(rzp/nVelo)} → ${velo_total} бр. Клас 1: ${Math.round(veloK1pct*100)}% (${velo_k1} бр.), Клас 2: ${100-Math.round(veloK1pct*100)}% (${velo_k2} бр.)`;
+    dost=dostapen(Math.round((total_min+total_max)/2),false,false,0,'');
+    break;
+  }
+
+  case 'hotel':{
+    const vid=s('hotel_vid'), stai=n('hotel_stai'), legla=n('hotel_legla'), h=s('hotel_height'), mesta=n('hotel_mesta');
+    const is45=vid.includes('4'); const isApart=vid.includes('Апарт');
+    const avt=is45?ceil(legla/5):isApart?stai:ceil(legla/10);
+    avt_min=avt_max=avt; total_min=total_max=avt; avt_dopr_pct=0;
+    const norm=is45?'5 легла':isApart?'апартамент':'10 легла';
+    const param=isApart?`${stai} апартамента`:is45?`${legla} легла / 5 = ${fmtR(legla/5)}`:`${legla} легла / 10 = ${fmtR(legla/10)}`;
+    avt_basis_text=`${param} → ${avt} бр. (норма: 1 бр. / ${norm})`;
+    avt_result_text=`${avt} бр.`;
+    catObj=catFromOO(mesta,0);
+    label=vid||'Хотел';
+    velo_total=ceil(stai/10); velo_k1=ceil(velo_total*0.6); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${stai} стаи / 10 = ${fmtR(stai/10)} → ${velo_total} бр. Клас 1 (60%): ${velo_k1} бр., Клас 2 (40%): ${velo_k2} бр.`;
+    dost=dostapen(avt,false,false,0,'');
+    break;
+  }
+
+  case 'lechebno':{
+    const vid=s('lech_vid'), rzp=n('lech_rzp'), legla=n('lech_legla'), kab=n('lech_kab'), h=s('lech_height'), mesta=n('lech_mesta');
+    const isBolnica=vid.includes('болница')||vid.includes('Лечебно');
+    const isPraktika=vid.includes('практика');
+    let norm_str=''; let avt=0; let dopr_pct=0;
+    if(isBolnica){avt=ceil(legla/10);dopr_pct=20;norm_str=`${legla} легла / 10 = ${fmtR(legla/10)}`;}
+    else if(isPraktika){avt=kab;dopr_pct=50;norm_str=`${kab} лекарски кабинета × 1 = ${kab}`;}
+    else{avt=ceil(legla/7);dopr_pct=10;norm_str=`${legla} легла / 5–10 (средно 7) = ${fmtR(legla/7)}`;}
+    const dopr=ceil(avt*dopr_pct/100); const total=avt+dopr;
+    avt_min=avt_max=avt; avt_dopr_pct=dopr_pct; avt_dopr_min=avt_dopr_max=dopr;
+    total_min=total_max=total;
+    avt_basis_text=`${norm_str} → ${avt} бр. основни. Доп. ${dopr_pct}% за посетители: ${avt}×${dopr_pct}% = ${fmtR(avt*dopr_pct/100)} → ${dopr} бр.`;
+    avt_result_text=`${total} бр.`;
+    catObj=catFromOO(mesta,rzp);
+    label=vid||'Лечебно заведение';
+    const veloRzp=rzp>0?rzp:legla*20;
+    velo_total=ceil(veloRzp/500); velo_k1=ceil(velo_total*0.75); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${veloRzp} м² РЗП / 500 м² = ${fmtR(veloRzp/500)} → ${velo_total} бр. Клас 1 (75%): ${velo_k1} бр., Клас 2 (25%): ${velo_k2} бр.`;
+    isSpecialDost=true;
+    dost=dostapen(total,true,false,0,'');
+    break;
+  }
+
+  case 'sport':{
+    const vid=s('sport_vid'), zp=n('sport_zp'), zrit=n('sport_zrit'), korts=n('sport_korts'), h=s('sport_height');
+    let avt=0; let norm_str='';
+    if(vid.includes('зрители')&&!vid.includes('без')){
+      avt_min=ceil(zrit/15); avt_max=ceil(zrit/10); avt_range=true;
+      avt_dopr_pct=0; total_min=avt_min; total_max=avt_max;
+      norm_str=`${zrit} зрителски места / 10–15 = ${fmtR(zrit/15)}–${fmtR(zrit/10)} → ${avt_min}–${avt_max} бр.`;
+      avt_result_text=`${avt_min}–${avt_max} бр.`;
+    } else if(vid.includes('Тенис')){
+      const base=4*korts; avt_min=avt_max=base; total_min=total_max=base;
+      norm_str=`${korts} корта × 4 бр. = ${base} бр.`;
+      avt_result_text=`${base} бр.`;
+    } else {
+      avt=ceil(zp/250); avt_min=avt_max=avt; total_min=total_max=avt;
+      norm_str=`${zp} м² ЗП / 250 м² = ${fmtR(zp/250)} → ${avt} бр.`;
+      avt_result_text=`${avt} бр.`;
+    }
+    avt_basis_text=norm_str;
+    catObj=catFromHeight(h||'Средно');
+    label=vid||'Спортен обект';
+    const veloZP=zp>0?zp:zrit*3;
+    velo_total=Math.max(10,ceil(veloZP/100)); velo_k1=ceil(velo_total*0.2); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${veloZP} м² ЗП / 100 м² = ${fmtR(veloZP/100)} → мин. 10 бр. → ${velo_total} бр. Клас 1 (20%): ${velo_k1} бр., Клас 2 (80%): ${velo_k2} бр.`;
+    isSpecialDost=true;
+    dost=dostapen(Math.round((total_min+total_max)/2)||avt_min,true,false,0,'');
+    break;
+  }
+
+  case 'kultura':{
+    const mesta=n('kult_mesta'), rzp=n('kult_rzp'), h=s('kult_height');
+    avt_min=ceil(mesta/10); avt_max=ceil(mesta/5); avt_range=true;
+    total_min=avt_min; total_max=avt_max; avt_dopr_pct=0;
+    avt_basis_text=`${mesta} места / 5–10 = ${fmtR(mesta/10)}–${fmtR(mesta/5)} → ${avt_min}–${avt_max} бр.`;
+    avt_result_text=`${avt_min}–${avt_max} бр.`;
+    catObj=catFromOO(mesta,rzp);
+    label='Театър / кино / концертна зала';
+    velo_total=Math.max(10,ceil(mesta/20)); velo_k1=ceil(velo_total*0.2); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${mesta} места / 20 = ${fmtR(mesta/20)} → мин. 10 бр. → ${velo_total} бр. Клас 1 (20%): ${velo_k1} бр., Клас 2 (80%): ${velo_k2} бр.`;
+    dost=dostapen(Math.round((avt_min+avt_max)/2),false,false,0,'');
+    break;
+  }
+
+  case 'obrazovanie':{
+    const vid=s('obr_vid'), uch=n('obr_uch'), sluz=n('obr_sluz'), rzp=n('obr_rzp'), h=s('obr_height'), mesta=n('obr_mesta');
+    const isVuz=vid.includes('Висше')||vid.includes('Колеж');
+    avt_min=isVuz?ceil((uch+sluz)/15):ceil(uch/30);
+    avt_max=isVuz?ceil((uch+sluz)/10):ceil(uch/25);
+    avt_range=(avt_min!==avt_max); total_min=avt_min; total_max=avt_max;
+    avt_basis_text=isVuz?`${uch+sluz} студенти+преподаватели / 10–15 = ${fmtR((uch+sluz)/15)}–${fmtR((uch+sluz)/10)} → ${avt_min}–${avt_max} бр.`:`${uch} ученици / 25–30 = ${fmtR(uch/30)}–${fmtR(uch/25)} → ${avt_min}–${avt_max} бр.`;
+    avt_result_text=`${avt_min===avt_max?avt_min:avt_min+'–'+avt_max} бр.`;
+    catObj=catFromOO(mesta,rzp);
+    label=vid||'Образование';
+    const veloSluz=ceil(sluz/10), veloUch=ceil(uch/5);
+    velo_total=veloSluz+veloUch; velo_k1=ceil(veloSluz*0.1); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`Служители: ${sluz}/10 = ${fmtR(sluz/10)} → ${veloSluz} бр. | ${isVuz?'Студенти':'Ученици'}: ${uch}/5 = ${fmtR(uch/5)} → ${veloUch} бр. Общо: ${velo_total} бр. Клас 1 (10% служители): ${velo_k1} бр., Клас 2 (90%): ${velo_k2} бр.`;
+    dost=dostapen(Math.round((avt_min+avt_max)/2),false,false,0,'');
+    break;
+  }
+
+  case 'detsko':{
+    const deca=n('det_deca'), sluz=n('det_sluz'), h=s('det_height');
+    avt_min=ceil(deca/30); avt_max=ceil(deca/20); avt_range=true;
+    total_min=avt_min; total_max=avt_max;
+    avt_basis_text=`${deca} деца / 20–30 = ${fmtR(deca/30)}–${fmtR(deca/20)} → ${avt_min}–${avt_max} бр.`;
+    avt_result_text=`${avt_min}–${avt_max} бр.`;
+    catObj=catFromHeight(h||'Средно');
+    label='Детско заведение';
+    const veloSluz=ceil(sluz/10), veloDeca=ceil(deca/10);
+    velo_total=veloSluz+veloDeca; velo_k1=ceil(veloSluz*0.1); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`Служители: ${sluz}/10 = ${fmtR(sluz/10)} → ${veloSluz} бр. | Деца: ${deca}/10 = ${fmtR(deca/10)} → ${veloDeca} бр. Общо: ${velo_total} бр. Клас 1 (10% служители): ${velo_k1} бр., Клас 2 (90%): ${velo_k2} бр.`;
+    dost=dostapen(Math.round((avt_min+avt_max)/2),false,false,0,'');
+    break;
+  }
+
+  case 'socusluga':{
+    const vid=s('soc_vid'), legla=n('soc_legla'), potr=n('soc_potr'), sluz=n('soc_sluz'), h=s('soc_height');
+    const isInstit=vid.includes('институции');
+    let avt=0, dopr_pct=0;
+    if(isInstit){avt=ceil(legla/20);dopr_pct=30;}else{avt=ceil(potr/7);dopr_pct=0;}
+    const dopr=ceil(avt*dopr_pct/100); const total=avt+dopr;
+    avt_min=avt_max=avt; avt_dopr_pct=dopr_pct; avt_dopr_min=avt_dopr_max=dopr;
+    total_min=total_max=total;
+    avt_basis_text=isInstit?`${legla} легла / 20 = ${fmtR(legla/20)} → ${avt} бр. + ${dopr_pct}% за посетители = ${dopr} бр. Общо: ${total} бр.`:`${potr} потребители/час / 5–10 (средно 7) = ${fmtR(potr/7)} → ${avt} бр.`;
+    avt_result_text=`${total} бр.`;
+    catObj=catFromOO(0,0); // ОО без специфични прагове тук
+    label=vid||'Социални услуги';
+    velo_total=ceil(sluz/4); velo_k1=ceil(velo_total*0.75); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${sluz} служители / 4 = ${fmtR(sluz/4)} → ${velo_total} бр. Клас 1 (75%): ${velo_k1} бр., Клас 2 (25%): ${velo_k2} бр.`;
+    isSpecialDost=true;
+    dost=dostapen(total,true,false,0,'');
+    break;
+  }
+
+  case 'proizv':{
+    const rab=n('pr_raboteshti'), rzp=n('pr_rzp'), sekt=s('pr_sektor');
+    const isMH=sekt.includes('Металург');
+    if(isMH){ catObj={cat:'I',ref:'т. 1, буква „к"',reason:'металургична или химическа промишленост — I категория независимо от капацитета'}; }
+    else {
+      if(rab>500) catObj={cat:'I',ref:'т. 1, буква „и"',reason:`производство с ${rab} работещи (над 500)`};
+      else if(rab>200) catObj={cat:'II',ref:'т. 2, буква „е"',reason:`производство с ${rab} работещи (200–500)`};
+      else if(rab>100) catObj={cat:'III',ref:'т. 3, буква „г"',reason:`производство с ${rab} работещи (100–200)`};
+      else if(rab>50) catObj={cat:'IV',ref:'т. 4, буква „в"',reason:`производство с ${rab} работещи (50–100)`};
+      else catObj={cat:'V',ref:'т. 5, буква „б"',reason:`производство с ${rab} работещи (до 50)`};
+    }
+    label='Производствена сграда';
+    const rab_zastup=ceil(rab*1.2);
+    avt_min=ceil(rab_zastup/10); avt_max=ceil(rab_zastup/8);
+    avt_dopr_pct=20; avt_dopr_min=ceil(avt_min*0.2); avt_dopr_max=ceil(avt_max*0.2);
+    total_min=avt_min+avt_dopr_min; total_max=avt_max+avt_dopr_max; avt_range=true;
+    avt_basis_text=`${rab} работещи (най-голяма смяна) × 1,20 (застъпване) = ${rab_zastup} / 8–10 = ${fmtR(rab_zastup/10)}–${fmtR(rab_zastup/8)} → ${avt_min}–${avt_max} бр. + 20% посетители = ${avt_dopr_min}–${avt_dopr_max} бр.`;
+    avt_result_text=`${total_min}–${total_max} бр.`;
+    velo_total=ceil(rzp/950); velo_k1=ceil(velo_total*0.8); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${rzp} м² РЗП / 950 м² = ${fmtR(rzp/950)} → ${velo_total} бр. Клас 1 (80%): ${velo_k1} бр., Клас 2 (20%): ${velo_k2} бр.`;
+    isSpecialDost=true;
+    dost=dostapen(Math.round((total_min+total_max)/2),true,false,0,'');
+    break;
+  }
+
+  case 'sklad':{
+    const rab=n('sk_raboteshti'), rzp=n('sk_rzp');
+    const avt=ceil(rab/4);
+    catObj={cat:'V',ref:'т. 5, буква „б"',reason:`складова база — категория по аналогия с производство`};
+    label='Склад / товарен терминал';
+    avt_min=avt_max=avt; total_min=total_max=avt; avt_dopr_pct=0;
+    avt_basis_text=`${rab} работещи от най-голямата смяна / 4 = ${fmtR(rab/4)} → ${avt} бр.`;
+    avt_result_text=`${avt} бр.`;
+    velo_total=ceil(rzp/950); velo_k1=ceil(velo_total*0.8); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${rzp} м² РЗП / 950 м² = ${fmtR(rzp/950)} → ${velo_total} бр. Клас 1 (80%): ${velo_k1} бр., Клас 2 (20%): ${velo_k2} бр.`;
+    isSpecialDost=true;
+    dost=dostapen(avt,true,false,0,'');
+    break;
+  }
+
+  case 'restoran':{
+    const mesta=n('rest_mesta'), rzp=n('rest_rzp'), h=s('rest_height');
+    avt_min=ceil(mesta/10); avt_max=ceil(mesta/6); avt_range=true;
+    total_min=avt_min; total_max=avt_max;
+    avt_basis_text=`${mesta} места за хранене / 6–10 = ${fmtR(mesta/10)}–${fmtR(mesta/6)} → ${avt_min}–${avt_max} бр.`;
+    avt_result_text=`${avt_min}–${avt_max} бр.`;
+    catObj=catFromHeight(h||'Средно');
+    label='Заведение за обществено хранене';
+    velo_total=ceil(mesta/7); velo_k1=ceil(velo_total*0.3); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`${mesta} места / 7 = ${fmtR(mesta/7)} → ${velo_total} бр. Клас 1 (30%): ${velo_k1} бр., Клас 2 (70%): ${velo_k2} бр.`;
+    dost=dostapen(Math.round((avt_min+avt_max)/2),false,false,0,'');
+    break;
+  }
+
+  case 'transport':{
+    const vid=s('tr_vid'), pat=n('tr_patnici'), sluz=n('tr_sluz'), mesta=n('tr_mesta'), h=s('tr_height');
+    const isLet=vid.includes('Летище');
+    const nMin=isLet?8:15, nMax=isLet?12:20;
+    avt_min=ceil(pat/nMax); avt_max=ceil(pat/nMin); avt_range=true;
+    total_min=avt_min; total_max=avt_max;
+    avt_basis_text=`${pat} пътници/час / ${nMin}–${nMax} = ${fmtR(pat/nMax)}–${fmtR(pat/nMin)} → ${avt_min}–${avt_max} бр.`;
+    avt_result_text=`${avt_min}–${avt_max} бр.`;
+    catObj=catFromOO(mesta,0);
+    label=vid||'Транспортна сграда';
+    const veloP=ceil(pat/30), veloS=ceil(sluz/10);
+    velo_total=veloP+veloS; velo_k1=ceil(velo_total*0.3); velo_k2=velo_total-velo_k1;
+    velo_basis_text=`Пътници: ${pat}/30 = ${fmtR(pat/30)} → ${veloP} бр. Служители: ${sluz}/10 = ${fmtR(sluz/10)} → ${veloS} бр. Общо: ${velo_total} бр. Клас 1 (30%): ${velo_k1} бр., Клас 2 (70%): ${velo_k2} бр.`;
+    isSpecialDost=true;
+    dost=dostapen(Math.round((avt_min+avt_max)/2),true,false,0,'');
+    break;
+  }
+
+  case 'obshtezhitie':{
+    const vid=s('ob_vid'), cnt=n('ob_count'), legla=n('ob_legla'), h=s('ob_height');
+    const isPomesh=vid.includes('помещения');
+    const avt=isPomesh?ceil(cnt/3):cnt;
+    avt_min=avt_max=avt; total_min=total_max=avt;
+    avt_basis_text=isPomesh?`${cnt} жилищни помещения / 3 = ${fmtR(cnt/3)} → ${avt} бр.`:`${cnt} жилищни единици × 1 бр. = ${avt} бр.`;
+    avt_result_text=`${avt} бр.`;
+    catObj=catFromHeight(h||'Средно');
+    label='Общежитие';
+    const v_main=ceil(legla/2); velo_k1=ceil(v_main*0.6); velo_k2=(v_main-velo_k1)+6; velo_total=v_main+6;
+    velo_basis_text=`${legla} легла / 2 = ${fmtR(legla/2)} → ${v_main} бр. + задължителни 6 открити стойки. Общо: ${velo_total} бр. Клас 1 (60%): ${velo_k1} бр., Клас 2 (40%+6 стойки): ${velo_k2} бр.`;
+    isZhil=true;
+    dost=dostapen(avt,false,false,0,'');
+    break;
+  }
+
+  }// end switch
+
+  // ─────────────────────────────────────────
+  // BUILD HTML OUTPUT
+  // ─────────────────────────────────────────
+  const CAT = CATS_META[catObj.cat]||{chip:'cat-VI',words:'?'};
+  const total_avt_str = avt_range?(total_min===total_max?total_min:total_min+'–'+total_max):total_min;
+  const total_avt_ref = avt_range?Math.round((total_min+total_max)/2):total_min;
+
+  // ── КАТЕГОРИЯ ──
+  let catSection = `<div class="section">
+    <div class="sec-head"><span class="sec-icon">🏛</span><span class="sec-title">Категория на строежа</span></div>
+    <div class="sec-body">
+      <div class="cat-chip c-${catObj.cat}">КАТЕГОРИЯ ${catObj.cat} (${catObj.cat==='I'?'ПЪРВА':catObj.cat==='II'?'ВТОРА':catObj.cat==='III'?'ТРЕТА':catObj.cat==='IV'?'ЧЕТВЪРТА':catObj.cat==='V'?'ПЕТА':'ШЕСТА'})</div>
+      <div class="text-block">
+        Настоящият обект се категоризира като строеж от <strong>категория ${CAT.words}</strong> съгласно чл. 137, ал. 1, ${catObj.ref} от Закона за устройство на територията, въз основа на ${catObj.reason}.
+        ${(catObj.cat==='III'||catObj.cat==='IV'||catObj.cat==='V')?'<div class="calc-line">Забележка (чл. 137, ал. 4): Ако строежът по друг критерий попада в по-висока категория, се категоризира в по-високата.</div>':''}
+      </div>
+    </div>
+  </div>`;
+
+  // ── АВТ ПАРКОМЕСТА ──
+  let avtSection = `<div class="section">
+    <div class="sec-head"><span class="sec-icon">🚗</span><span class="sec-title">Автомобилни паркоместа</span></div>
+    <div class="sec-body"><div class="text-block">
+      Предвидени са <strong>${total_avt_str} бр. паркоместа</strong>, което отговаря на минималния брой съгласно ${NALOGKA_AVT}, което се вижда от следното изчисление:
+      <div class="calc-line">${avt_basis_text}</div>
+      <div class="result-line">Предвидените паркоместа са ${total_avt_str} бр.</div>
+      ${avt_range?'<div class="calc-line">Конкретната стойност в рамките на диапазона зависи от значението на обекта (местно, районно или по-високо ниво) и структурата на урбанизираната територия — Забележка 3 към Приложение № 5.</div>':''}
+      <div class="ref-line">Нормативно основание: ${NALOGKA_AVT}</div>
+    </div></div>
+  </div>`;
+
+  // ── ЕПС ──
+  const eps_text_val = epsText(total_avt_ref, isZhil);
+  let epsSection = `<div class="section">
+    <div class="sec-head"><span class="sec-icon">⚡</span><span class="sec-title">Паркоместа със зарядна точка за ЕПС</span></div>
+    <div class="sec-body"><div class="text-block">
+      ${eps_text_val}
+      <div class="ref-line">Нормативно основание: чл. 50 от Наредба № РД-02-20-2 от 2017 г.</div>
+    </div></div>
+  </div>`;
+
+  // ── ВЕЛО ПАРКОМЕСТА ──
+  const veloRef = TYPE==='zhil'||TYPE==='obshtezhitie'?'Приложение № 4 към чл. 40, ал. 3':'Приложение № 4 към чл. 40, ал. 3';
+  let veloSection = `<div class="section">
+    <div class="sec-head"><span class="sec-icon">🚲</span><span class="sec-title">Велосипедни паркоместа</span></div>
+    <div class="sec-body"><div class="text-block">
+      Предвидени са <strong>${velo_total} бр. велосипедни паркоместа</strong>, което отговаря на минималния брой съгласно ${NALOGKA_VEL}, което се вижда от следното изчисление:
+      <div class="calc-line">${velo_basis_text}</div>
+      <div class="result-line">Предвидените велосипедни паркоместа са общо ${velo_total} бр., от които:</div>
+      <div class="calc-line">• Клас 1 (дълговременно паркиране &gt;2 ч.) — ${velo_k1} бр.<br>• Клас 2 (кратковременно паркиране ≤2 ч.) — ${velo_k2} бр.</div>
+      ${velo_note?`<div class="calc-line">${velo_note}</div>`:''}
+      <div class="ref-line">Нормативно основание: ${NALOGKA_VEL}</div>
+    </div></div>
+  </div>`;
+
+  // ── ДОСТЪПНИ ПАРКОМЕСТА ──
+  let dostSection = `<div class="section">
+    <div class="sec-head"><span class="sec-icon">♿</span><span class="sec-title">Достъпни паркоместа за хора с увреждания</span></div>
+    <div class="sec-body"><div class="text-block">
+      ${dost.text}
+      <div class="ref-line">Нормативно основание: ${NALOGKA_DOST}</div>
+    </div></div>
+  </div>`;
+
+  sectionsHTML = catSection + avtSection + epsSection + veloSection + dostSection;
+
+  // ── SHOW RESULT ──
+  document.getElementById('r-badge').textContent = `${label} · Категория ${catObj.cat}`;
+  document.getElementById('r-title').textContent = label;
+  document.getElementById('r-ref').textContent = `чл. 137, ал. 1, ${catObj.ref} от ЗУТ`;
+  document.getElementById('r-sections').innerHTML = sectionsHTML;
+
+  document.getElementById('s2').style.display = 'none'; // hide wizard
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('prog').style.width = '100%';
+  ['pl0','pl1','pl2'].forEach(id=>document.getElementById(id).classList.add('done'));
+
+  // store for copy
+  window._copyCache = buildCopyText(label, catObj, total_avt_str, avt_basis_text, avt_range, eps_text_val, velo_total, velo_k1, velo_k2, velo_basis_text, velo_note, dost, NALOGKA_AVT, NALOGKA_VEL, NALOGKA_DOST);
+}
+
+const CATS_META = {
+  I:{words:'I (първа)',chip:'c-I'},II:{words:'II (втора)',chip:'c-II'},
+  III:{words:'III (трета)',chip:'c-III'},IV:{words:'IV (четвърта)',chip:'c-IV'},
+  V:{words:'V (пета)',chip:'c-V'},VI:{words:'VI (шеста)',chip:'c-VI'},
+};
+
+function epsText(total, isZhil){
+  if(total<=10) return `Не са предвидени паркоместа със зарядна точка за ЕПС съгласно чл. 50, ал. 2 от Наредба № РД-02-20-2 от 20 декември 2017 г. за планиране и проектиране на комуникационно-транспортната система на урбанизираните територии, тъй като общият брой на паркоместата е по-малък от 10 бр.`;
+  if(isZhil) return `За нова жилищна сграда с ${total} паркоместа (повече от 10 бр.) се предвижда тръбопроводна инфраструктура за всички паркоместа, за да се осигури възможност за инсталиране на зарядни точки за ЕПС на по-късен етап (чл. 50, ал. 7 от Наредба № РД-02-20-2 от 2017 г.). Видът и броят на зарядните точки се определят по задание на възложителя.`;
+  const trub=Math.ceil(total/5);
+  return `Предвидени са паркоместа за ЕПС съгласно чл. 50, ал. 2 от Наредба № РД-02-20-2 от 20 декември 2017 г.: мин. 1 паркомясто, оборудвано с зарядна точка с голяма мощност (>22 kW); мин. 1 паркомясто, оборудвано с зарядна точка с мощност до 3,7 kW; за 1 от всеки 5 паркоместа се проектира тръбопроводна инфраструктура — ${trub} бр. паркоместа. От 01.01.2025 г. при над 20 паркоместа задължително се оборудват мин. 1 зарядна точка с голяма мощност и мин. 1 с мощност до 3,7 kW.`;
+}
+
+function buildCopyText(label, catObj, avt_str, avt_basis, avt_range, eps_val, vt, vk1, vk2, vbasis, vnote, dost, NAVT, NVEL, NDOST){
+  const CNAME = {I:'ПЪРВА',II:'ВТОРА',III:'ТРЕТА',IV:'ЧЕТВЪРТА',V:'ПЕТА',VI:'ШЕСТА'}[catObj.cat]||'';
+  return `КАТЕГОРИЯ СТРОЕЖ И ПАРКОМЕСТА — ${label.toUpperCase()}
+${'─'.repeat(60)}
+
+КАТЕГОРИЯ НА СТРОЕЖА:
+Настоящият обект се категоризира като строеж от категория ${catObj.cat} (${CNAME}) съгласно чл. 137, ал. 1, ${catObj.ref} от ЗУТ, въз основа на ${catObj.reason}.
+
+${'─'.repeat(60)}
+
+АВТОМОБИЛНИ ПАРКОМЕСТА:
+Предвидени са ${avt_str} бр. паркоместа, което отговаря на минималния брой съгласно ${NAVT}. Изчисление: ${avt_basis.replace(/<[^>]+>/g,'')}. Предвидените паркоместа са ${avt_str} бр.${avt_range?'\nКонкретната стойност в рамките на диапазона зависи от значението на обекта (местно, районно или по-високо ниво) и структурата на урбанизираната територия.':''}
+
+${'─'.repeat(60)}
+
+ПАРКОМЕСТА СЪС ЗАРЯДНА ТОЧКА ЗА ЕПС:
+${eps_val.replace(/<[^>]+>/g,'')}
+
+${'─'.repeat(60)}
+
+ВЕЛОСИПЕДНИ ПАРКОМЕСТА:
+Предвидени са ${vt} бр. велосипедни паркоместа, което отговаря на минималния брой съгласно ${NVEL}. Изчисление: ${vbasis.replace(/<[^>]+>/g,'')}. Предвидените велосипедни паркоместа са общо ${vt} бр., от които: Клас 1 (дълговременно >2 ч.) — ${vk1} бр.; Клас 2 (кратковременно ≤2 ч.) — ${vk2} бр.${vnote?'\n'+vnote:''}
+
+${'─'.repeat(60)}
+
+ДОСТЪПНИ ПАРКОМЕСТА ЗА ХОРА С УВРЕЖДАНИЯ:
+${dost.text.replace(/<[^>]+>/g,'').replace(/\s+/g,' ')}
+Нормативно основание: ${NDOST}
+
+${'─'.repeat(60)}
+Инструментът е информативен и не замества правна консултация.`;
+}
+
+function restart(){
+  TYPE='';
+  document.getElementById('result').style.display='none';
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s2').style.display='';
+  document.getElementById('s1').classList.add('active');
+  document.getElementById('prog').style.width='0%';
+  ['pl0','pl1','pl2'].forEach(id=>document.getElementById(id).classList.remove('done'));
+}
+
+let _ct;
+function copyAll(){
+  const text=window._copyCache||'';
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copy-btn');
+    btn.textContent='✓ Копирано!';
+    clearTimeout(_ct);_ct=setTimeout(()=>btn.textContent='Копирай текста',2200);
+  });
+}
+</script>
+</body>
+</html>
